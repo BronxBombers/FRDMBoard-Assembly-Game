@@ -478,13 +478,24 @@ EndDIVU
 ;Lab Section 1, Wednesdays from 5:30PM - 7:30PM
 
 ;This subroutine dequeues a character from the ReceiveQueue and returns it into register R0.
-;No input parameters
+;Input Parameters:
+;R2 gets the time it should take for the round to run. 
 ;Output:
 ;R0 : Dequeued character into R0
 GetChar		PROC		{R0,R2-R14}, {}
 	
 			PUSH	{R1, LR}			;Save LR value
+            
+            LDRB    R3,=RunStopWatch
+            MOVS    R4,#1
+            STRB    R4,[R3,#0]
+            LDR     R3,=Count
+            ;LDR     R3,[R3,#0]
 keepGoing
+            LDR     R3,[R3,#0]
+            CMP     R3,R2
+            BGE     EndWhile
+            
 			CPSID	I					;Mask other interrupts
 			LDR		R1,=ReceiveQueue	;R0 gets the address of the queue ReceiveQueue
 			BL		DeQueue				;Dequeue from ReceiveQueue
@@ -762,17 +773,28 @@ ClearInterrupt
 
 ;No input parameters.
 ;Prints out a new line to the terminal. 
-NewLine		PROC		{R0,R14}, {}
+NewLine		PROC		{R0-R14}, {}
 ;Keep
-	PUSH	{R0, LR}
-	MOVS	R0,#0x0A		;Move the value hex A into R0, which is the ascii value for NL, or new line.
-	BL		PutChar			;Print the value of the ascii number in R0 to the screen, so a new line is printed. 
-	MOVS	R0,#0x0D		;Move the value hex D into R0, which is the ascii value for CR, or carriage return.
-	BL		PutChar			;Print the value of the ascii number in R0 to the screen, so the carriage return is printed. 
-	POP		{R0, PC}
-	ENDP
+        PUSH	{R0, LR}
+        MOVS	R0,#0x0A		;Move the value hex A into R0, which is the ascii value for NL, or new line.
+        BL		PutChar			;Print the value of the ascii number in R0 to the screen, so a new line is printed. 
+        MOVS	R0,#0x0D		;Move the value hex D into R0, which is the ascii value for CR, or carriage return.
+        BL		PutChar			;Print the value of the ascii number in R0 to the screen, so the carriage return is printed. 
+        POP		{R0, PC}
+        ENDP
 		
-		
+	
+GetRandomNumber     PROC       {R1-R14}
+    
+        PUSH    {R1, LR}
+        LDR     R1,=Count
+        LDR     R1,[R1,#0]
+        MOVS    R0,#4
+        BL      DIVU
+        MOVS    R0,R1
+        POP     {R1, PC}
+        ENDP
+
 ;This subroutine initializes the queue. It sets the InPointer and OutPointer
 ;both to point at the beginning of QBuffer. BufferStart is the address at the 
 ;start of QBuffer. BufferSize is the total size that the queue can hold. Before
