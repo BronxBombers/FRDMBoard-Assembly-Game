@@ -229,9 +229,25 @@ main
             ;Initialize the UART0_IRQ
 			CPSID	I
 			BL		Init_UART0_IRQ
+			BL		Init_Lights
 			CPSIE	I
 			
-            ;Enable Port D and Port E
+          
+
+       
+           
+
+;>>>>>   end main program code <<<<<
+;Stay here
+            B       .
+            ENDP
+;>>>>> begin subroutine code <<<<<
+
+
+Init_Lights		PROC		{R0-R14}
+			PUSH		{R0-R2}
+			
+			;Enable Port D and Port E
             LDR     R0,=SIM_SCGC5
             LDR     R1,=(SIM_SCGC5_PORTD_MASK :OR: SIM_SCGC5_PORTE_MASK)
             LDR     R2,[R0,#0]
@@ -248,31 +264,84 @@ main
             LDR     R1,=SET_PTD5_GPIO
             STR     R1,[R0,#PORTD_PCR5_OFFSET]
             
-            LDR  R0,=FGPIOD_BASE
-            LDR  R1,=LED_PORTD_MASK
-            STR  R1,[R0,#GPIO_PDDR_OFFSET]
-            LDR  R0,=FGPIOE_BASE
-            LDR  R1,=LED_PORTE_MASK
-            STR  R1,[R0,#GPIO_PDDR_OFFSET]
+            LDR  	R0,=FGPIOD_BASE
+            LDR  	R1,=LED_PORTD_MASK
+            STR  	R1,[R0,#GPIO_PDDR_OFFSET]
+            LDR  	R0,=FGPIOE_BASE
+            LDR  	R1,=LED_PORTE_MASK
+            STR  	R1,[R0,#GPIO_PDDR_OFFSET]
+	
+			POP		{R0-R2}
+			BX		LR
+			ENDP
+				
 
-            ;Turn on red LED
-            LDR  R0,=FGPIOE_BASE
+;Subroutine: Toggle Light
+;Input: R0: 0 for Red, anything else for Green
+
+Toggle_Light    PROC		{R0-R14}
+			PUSH			{R0-R3}
+			
+			CMP		R0,#0
+			BEQ		None
+			CMP		R0,#1
+			BEQ		Red
+			CMP		R0,#2
+			BEQ		Green
+			CMP		R0,#3
+			BEQ		BothLights
+			
+			
+None		;Turn off red LED
+			LDR  R0,=FGPIOE_BASE
+			LDR  R1,=LED_RED_MASK
+			STR  R1,[R0,#GPIO_PSOR_OFFSET]
+			
+			;Turn off green LED
+			LDR  R0,=FGPIOD_BASE
+			LDR  R1,=LED_GREEN_MASK
+			STR  R1,[R0,#GPIO_PSOR_OFFSET]
+			B	 EndLight
+		
+			
+			;Turn on red LED
+Red			LDR  R0,=FGPIOE_BASE
             LDR  R1,=LED_RED_MASK
             STR  R1,[R0,#GPIO_PCOR_OFFSET]
-            
-            ;Turn on green LED
-            LDR  R0,=FGPIOD_BASE
+			
+			;Turn off green LED
+			LDR  R0,=FGPIOD_BASE
+			LDR  R1,=LED_GREEN_MASK
+			STR  R1,[R0,#GPIO_PSOR_OFFSET]
+			B	 EndLight
+			
+			
+Green 		;Turn on green LED
+			LDR  R0,=FGPIOD_BASE
             LDR  R1,=LED_GREEN_MASK
             STR  R1,[R0,#GPIO_PCOR_OFFSET]
-           
+			
+			;Turn off red LED
+			LDR  R0,=FGPIOE_BASE
+			LDR  R1,=LED_RED_MASK
+			STR  R1,[R0,#GPIO_PSOR_OFFSET]
+			B	 EndLight
 
-;>>>>>   end main program code <<<<<
-;Stay here
-            B       .
-            ENDP
-;>>>>> begin subroutine code <<<<<
-
-		
+Both		;Turn on red LED
+			LDR  R0,=FGPIOE_BASE
+            LDR  R1,=LED_RED_MASK
+            STR  R1,[R0,#GPIO_PCOR_OFFSET]
+			
+			;Turn on green LED
+			LDR  R0,=FGPIOD_BASE
+            LDR  R1,=LED_GREEN_MASK
+            STR  R1,[R0,#GPIO_PCOR_OFFSET]
+			
+EndLight	POP  {R0-R3}
+			BX	 LR
+			ENDP
+				
+				
 ;This subroutine prints out a given string to the screen. 
 ;Input parameters:
 ;R0 : Address of the string to be printed
