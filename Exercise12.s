@@ -1073,11 +1073,24 @@ __Vectors_Size  EQU     __Vectors_End - __Vectors
             AREA    MyConst,DATA,READONLY
 ;>>>>> begin constants here <<<<<
 
-enterName		DCB		0x0D, "Enter your name. ", 0x0A, 0x0D, 0x3E, 0 ;String to prompt entering name.
-seconds			DCB		" x 0.01 s", 0x0A, 0x0D, 0 ;String showing the number of seconds it took to enter the last input. 
-theDate			DCB		0x0D,"Enter the Date. ", 0x0A, 0x0D, 0x3E, 0 ;String to prompt entering the date.
-lastName		DCB		0x0D,"Enter the last name of a 250 lab TA. ", 0x0A, 0x0D, 0x3E, 0 ;String to prompt entering TA's name.
-endString       DCB     0x0D,"Thank you. Goodbye!",0 ;String to show the end of the program. 
+beginningPrompt DCB     0x0D, "Welcome to Color Match!", 0x0A, 0x0D, "Press 'Enter' to start and 'R' for rules.", 0x0A, 0x0D, 0
+helpCommands    DCB     0x0D, "RULES:", 0x0A, 0x0D, "LEDSs will light up on the microcontroller once the game begins.", 0x0A, 0x0D, 0
+helpCommands2   DCB     0x0D, "If one LED is lit, press 'R' if the red LED is lit and 'G' if the green LED is lit." 0x0A, 0x0D, 0
+helpCommands3   DCB     0x0D, "If both are lit, press 'B' and if neither are lit, press 'N'.", 0x0A, 0x0D, 0
+helpCommands4   DCB     0x0D, "Wrong answers reduce the value of getting the right answer." 0x0A, 0x0D, 0
+helpCommands5   DCB     0x0D, "The further the round, the faster and harder the game gets." 0x0A, 0x0D, 0 
+helpCommands6   DCB     0x0D, "The faster the correct answer, the more points you get! Good Luck!", 0x0A, 0x0D, 0
+
+correct         DCB     0x0D, ":   Correct--color was ", 0
+wrong           DCB     0x0D, ":   Wrong", 0x0A, 0x0D, 0
+outOfTime       DCB     0x0D, ":   Out of time--color was ", 0
+red             DCB     "red", 0x0D, 0x0A, 0
+green           DCB     "green", 0x0D, 0x0A, 0
+both            DCB     "both", 0x0D, 0x0A, 0
+neither         DCB     "neither", 0x0D, 0x0A, 0
+
+currentScore    DCB     "Current Score: ", 0
+finalScore      DCB     "Final Score: ", 0 
 
 ;>>>>>   end constants here <<<<<
             ALIGN
