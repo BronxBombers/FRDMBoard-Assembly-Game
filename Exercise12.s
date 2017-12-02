@@ -229,8 +229,27 @@ main
             ;Initialize the UART0_IRQ
 			CPSID	I
 			BL		Init_UART0_IRQ
+			BL		Init_PIT_IRQ
 			BL		Init_Lights
 			CPSIE	I
+			
+			LDR		R0,=RunStopWatch
+			MOVS	R1,#1
+			STR		R1,[R0,#0]
+			
+			LDR		R0,=beginningPrompt
+			BL		PutStringSB
+			
+			BL		GetRandomNumber
+			BL		Toggle_Light
+				
+			LDR		R2,=0x1FFFFFFF
+MainLoop	BL		GetChar
+			LDR		R2,=Count
+			LDR		R2,[R2,#0]
+			BL		GetRandomNumber
+			
+			
 			
           
 
@@ -855,13 +874,17 @@ NewLine		PROC		{R0-R14}, {}
 	
 GetRandomNumber     PROC       {R1-R14}
     
-        PUSH    {R1, LR}
-        LDR     R1,=Count
-        LDR     R1,[R1,#0]
+        PUSH    {R0,R2-R3, LR}
+        LDR     R2,=Count
+        LDR     R2,[R2,#0]
+		MOVS	R1,R2
         MOVS    R0,#4
         BL      DIVU
         MOVS    R0,R1
-        POP     {R1, PC}
+		MOVS	R1,#0
+		STR		R1,[R2,#0]
+		MOVS	R1,R0
+        POP     {R0,R2-R3, PC}
         ENDP
 
 ;This subroutine initializes the queue. It sets the InPointer and OutPointer
