@@ -247,6 +247,7 @@ MainLoop	LDR		R0,=beginningPrompt
 			
 			LDR		R2,=0x1FFFFFFF
 			BL		GetChar
+			MOVS	R5,#0
 			MOVS	R2,#0xB
 			CMP		R0,#0x0D
 			BEQ		GameLoop
@@ -271,10 +272,12 @@ Rules		LDR		R0,=helpCommands
 			B		MainLoop
 			
 GameLoop	SUBS	R2,R2,#1
+			ADDS	R5,R5,#1
 			LDR		R0,=roundNum
 			BL		PutStringSB
-			MOVS	R0,R2
+			MOVS	R0,R5
 			BL		PutNumU
+			BL		NewLine
 			BL		GetRandomNumber
 			BL		Toggle_Light
 			MOVS	R4,#0
@@ -332,8 +335,9 @@ Right		LDR		R3,=Count
 			BL		NewLine
 			LDR		R0,=Score
 			MOVS	R1,R4
+			MOVS	R2,R5
 			BL		Scoring
-			CMP		R2,#1
+			CMP		R2,#10
 			BEQ		EndOfGame
 			LDR		R0,=currentScore
 			BL		PutStringSB
@@ -683,7 +687,7 @@ EndDIVU
 ;R0 : Dequeued character into R0
 GetChar		PROC		{R0,R2-R14}, {}
 	
-			PUSH	{R1, LR}			;Save LR value
+			PUSH	{R1-R4, LR}			;Save LR value
 			
 			MRS     R0,APSR		                ;The following lines clear the C flag without changing other values
             MOVS    R1,#0x20
@@ -691,9 +695,11 @@ GetChar		PROC		{R0,R2-R14}, {}
             BICS    R0,R0,R1
             MSR     APSR,R0
 			
-            
-keepGoing	LDR     R3,=Count
+			LDR     R3,=Count
             LDR     R3,[R3,#0]
+			MOVS	R4,#100
+            MULS	R2,R4,R2
+keepGoing	
             CMP     R2,R3
             BLE     EndWhile
             
@@ -703,7 +709,7 @@ keepGoing	LDR     R3,=Count
 			CPSIE	I					;Unmask other interrupts
 			BCS		keepGoing			;If the carry flag was set, go to keepGoing
 EndWhile	
-			POP		{R1, PC}			;Restore PC value
+			POP		{R1-R2, PC}			;Restore PC value
 			ENDP
 
 
@@ -1141,6 +1147,32 @@ EndEnQueue
             POP		{R0-R5}	                    ;Restore values of registers 1-5
             BX		LR
             ENDP
+
+
+;R0 : Pointer to Score Variable
+;R1 : Number of Incorrect Answers
+;R2 : Round Number
+;R3 : Time it took
+Scoring        PROC     {R1-R14}
+        
+        PUSH    {R0-R7, LR}
+        MOVS    R6,R0       ;R6 gets saved address
+        MOVS    R5,#100  ;R5 gets 100
+        MULS    R2,R5,R2 ;R2 gets the round number times 100
+        LSRS    R2,R2,R1 ;R2 gets value after incorrect number of answers
+        
+        LDR     R1,=2000    ;R1 gets 2000
+        SUBS    R1,R1,R3    ;R1 gets time multiplier (2000 - 500 (5seconds) = 1500)
+        MULS    R1,R2,R1    ;Multiply above score times multiplier (before division of 1000)
+        
+        LDR     R0,=1000     ;R0 gets denominator (divide score by 1000)
+
+        BL      DIVU        ;R0 gets score
+        
+        STR     R0,[R6,#0]
+        
+        POP     {R0-R7, PC}
+        ENDP
 
 ;>>>>>   end subroutine code <<<<<
             ALIGN

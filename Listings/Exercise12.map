@@ -29,38 +29,50 @@ Image Symbol Table
     SystemInit                               0x0000010f   Thumb Code    54  start.o(Start)
     SetClock48MHz                            0x00000145   Thumb Code   140  start.o(Start)
     .ARM.__at_0x400                          0x00000400   Section       16  start.o(.ARM.__at_0x400)
-    MyCode                                   0x00000410   Section     1364  exercise12.o(MyCode)
-    Init_Lights                              0x000004bd   Thumb Code    52  exercise12.o(MyCode)
-    Toggle_Light                             0x000004f1   Thumb Code    76  exercise12.o(MyCode)
-    PutStringSB                              0x0000053d   Thumb Code    20  exercise12.o(MyCode)
-    PutNumU                                  0x00000595   Thumb Code    42  exercise12.o(MyCode)
-    DIVU                                     0x000005f7   Thumb Code    66  exercise12.o(MyCode)
-    GetChar                                  0x00000639   Thumb Code    38  exercise12.o(MyCode)
-    UART0_ISR                                0x00000675   Thumb Code    74  exercise12.o(MyCode)
-    Init_UART0_IRQ                           0x000006bf   Thumb Code   150  exercise12.o(MyCode)
-    Init_PIT_IRQ                             0x00000755   Thumb Code    72  exercise12.o(MyCode)
-    PIT_ISR                                  0x0000079d   Thumb Code    28  exercise12.o(MyCode)
-    GetRandomNumber                          0x000007c9   Thumb Code    40  exercise12.o(MyCode)
-    InitQueue                                0x000007f1   Thumb Code    22  exercise12.o(MyCode)
-    DeQueue                                  0x00000807   Thumb Code    72  exercise12.o(MyCode)
-    EnQueue                                  0x0000084f   Thumb Code    72  exercise12.o(MyCode)
-    MyConst                                  0x00000964   Section      608  exercise12.o(MyConst)
-    Welcome                                  0x00000964   Data          27  exercise12.o(MyConst)
-    beginningPrompt                          0x0000097f   Data          45  exercise12.o(MyConst)
-    helpCommands                             0x000009ac   Data          76  exercise12.o(MyConst)
-    helpCommands2                            0x000009f8   Data          68  exercise12.o(MyConst)
-    helpCommands3                            0x00000a3c   Data          65  exercise12.o(MyConst)
-    helpCommands4                            0x00000a7d   Data          63  exercise12.o(MyConst)
-    helpCommands5                            0x00000abc   Data          63  exercise12.o(MyConst)
-    helpCommands6                            0x00000afb   Data          70  exercise12.o(MyConst)
+    MyCode                                   0x00000410   Section     1616  exercise12.o(MyCode)
+    Init_Lights                              0x00000595   Thumb Code    52  exercise12.o(MyCode)
+    Toggle_Light                             0x000005c9   Thumb Code    76  exercise12.o(MyCode)
+    PutStringSB                              0x00000615   Thumb Code    20  exercise12.o(MyCode)
+    PutNumHex                                0x00000629   Thumb Code    56  exercise12.o(MyCode)
+    PutNumU                                  0x0000066d   Thumb Code    42  exercise12.o(MyCode)
+    DIVU                                     0x000006cf   Thumb Code    66  exercise12.o(MyCode)
+    GetChar                                  0x00000711   Thumb Code    42  exercise12.o(MyCode)
+    UART0_ISR                                0x00000751   Thumb Code    74  exercise12.o(MyCode)
+    Init_UART0_IRQ                           0x0000079b   Thumb Code   150  exercise12.o(MyCode)
+    Init_PIT_IRQ                             0x00000831   Thumb Code    72  exercise12.o(MyCode)
+    PIT_ISR                                  0x00000879   Thumb Code    28  exercise12.o(MyCode)
+    NewLine                                  0x00000895   Thumb Code    16  exercise12.o(MyCode)
+    GetRandomNumber                          0x000008a5   Thumb Code    40  exercise12.o(MyCode)
+    InitQueue                                0x000008cd   Thumb Code    22  exercise12.o(MyCode)
+    DeQueue                                  0x000008e3   Thumb Code    72  exercise12.o(MyCode)
+    EnQueue                                  0x0000092b   Thumb Code    72  exercise12.o(MyCode)
+    Scoring                                  0x00000973   Thumb Code    26  exercise12.o(MyCode)
+    MyConst                                  0x00000a60   Section      620  exercise12.o(MyConst)
+    Welcome                                  0x00000a60   Data          27  exercise12.o(MyConst)
+    beginningPrompt                          0x00000a7b   Data          45  exercise12.o(MyConst)
+    helpCommands                             0x00000aa8   Data          76  exercise12.o(MyConst)
+    helpCommands2                            0x00000af4   Data          68  exercise12.o(MyConst)
+    helpCommands3                            0x00000b38   Data          65  exercise12.o(MyConst)
+    helpCommands4                            0x00000b79   Data          63  exercise12.o(MyConst)
+    helpCommands5                            0x00000bb8   Data          63  exercise12.o(MyConst)
+    helpCommands6                            0x00000bf7   Data          70  exercise12.o(MyConst)
+    correct                                  0x00000c3d   Data          24  exercise12.o(MyConst)
+    red                                      0x00000c7d   Data           6  exercise12.o(MyConst)
+    green                                    0x00000c83   Data           8  exercise12.o(MyConst)
+    both                                     0x00000c8b   Data           7  exercise12.o(MyConst)
+    neither                                  0x00000c92   Data          10  exercise12.o(MyConst)
+    currentScore                             0x00000c9c   Data          16  exercise12.o(MyConst)
+    finalScore                               0x00000cac   Data          14  exercise12.o(MyConst)
+    roundNum                                 0x00000cba   Data          15  exercise12.o(MyConst)
     .ARM.__at_0x1FFFE000                     0x1fffe000   Section      256  start.o(.ARM.__at_0x1FFFE000)
-    MyData                                   0x1fffe100   Section      288  exercise12.o(MyData)
+    MyData                                   0x1fffe100   Section      292  exercise12.o(MyData)
     TransmitQueue                            0x1fffe100   Data          18  exercise12.o(MyData)
     ReceiveQueue                             0x1fffe114   Data          18  exercise12.o(MyData)
     QBufferTransmit                          0x1fffe128   Data          80  exercise12.o(MyData)
     QBufferReceive                           0x1fffe178   Data          80  exercise12.o(MyData)
     RunStopWatch                             0x1fffe1c8   Data           1  exercise12.o(MyData)
     Count                                    0x1fffe1cc   Data           4  exercise12.o(MyData)
+    Score                                    0x1fffe220   Data           4  exercise12.o(MyData)
 
     Global Symbols
 
@@ -73,8 +85,8 @@ Image Symbol Table
     Startup                                  0x00000101   Thumb Code    14  start.o(Start)
     Dummy_Handler                            0x000001d1   Thumb Code     2  start.o(Start)
     HardFault_Handler                        0x000001d1   Thumb Code     0  start.o(Start)
-    Reset_Handler                            0x00000411   Thumb Code   122  exercise12.o(MyCode)
-    PutChar                                  0x0000065f   Thumb Code    22  exercise12.o(MyCode)
+    Reset_Handler                            0x00000411   Thumb Code   296  exercise12.o(MyCode)
+    PutChar                                  0x0000073b   Thumb Code    22  exercise12.o(MyCode)
     __initial_sp                             0x1fffe100   Data           0  start.o(.ARM.__at_0x1FFFE000)
 
 
@@ -85,9 +97,9 @@ Memory Map of the image
 
   Image Entry point : 0x00000411
 
-  Load Region LR_1 (Base: 0x00000000, Size: 0x00000de4, Max: 0xffffffff, ABSOLUTE)
+  Load Region LR_1 (Base: 0x00000000, Size: 0x00000ef0, Max: 0xffffffff, ABSOLUTE)
 
-    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000bc4, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000ccc, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -96,19 +108,19 @@ Memory Map of the image
     0x00000100   0x00000100   0x000000fc   Code   RO           10    Start               start.o
     0x000001fc   0x000001fc   0x00000204   PAD
     0x00000400   0x00000400   0x00000010   Code   RO           12    .ARM.__at_0x400     start.o
-    0x00000410   0x00000410   0x00000554   Code   RO            1  * MyCode              exercise12.o
-    0x00000964   0x00000964   0x00000260   Data   RO            3    MyConst             exercise12.o
+    0x00000410   0x00000410   0x00000650   Code   RO            1  * MyCode              exercise12.o
+    0x00000a60   0x00000a60   0x0000026c   Data   RO            3    MyConst             exercise12.o
 
 
-    Execution Region ER_RW (Exec base: 0x1fffe000, Load base: 0x00000bc4, Size: 0x00000220, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RW (Exec base: 0x1fffe000, Load base: 0x00000ccc, Size: 0x00000224, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x1fffe000   0x00000bc4   0x00000100   Data   RW           13    .ARM.__at_0x1FFFE000  start.o
-    0x1fffe100   0x00000cc4   0x00000120   Data   RW            4    MyData              exercise12.o
+    0x1fffe000   0x00000ccc   0x00000100   Data   RW           13    .ARM.__at_0x1FFFE000  start.o
+    0x1fffe100   0x00000dcc   0x00000124   Data   RW            4    MyData              exercise12.o
 
 
-    Execution Region ER_ZI (Exec base: 0x1fffe220, Load base: 0x00000de4, Size: 0x00000000, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_ZI (Exec base: 0x1fffe224, Load base: 0x00000ef0, Size: 0x00000000, Max: 0xffffffff, ABSOLUTE)
 
     **** No section assigned to this execution region ****
 
@@ -120,11 +132,11 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      1364        256        800        288          0       1776   exercise12.o
+      1616        304        812        292          0       1896   exercise12.o
        268         58         64        256          0        768   start.o
 
     ----------------------------------------------------------------------
-      2148        830        864        544          0       2544   Object Totals
+      2400        878        876        548          0       2664   Object Totals
          0          0          0          0          0          0   (incl. Generated)
        516        516          0          0          0          0   (incl. Padding)
 
@@ -139,15 +151,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      2148        830        864        544          0       2440   Grand Totals
-      2148        830        864        544          0       2440   ELF Image Totals
-      2148        830        864        544          0          0   ROM Totals
+      2400        878        876        548          0       2560   Grand Totals
+      2400        878        876        548          0       2560   ELF Image Totals
+      2400        878        876        548          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 3012 (   2.94kB)
-    Total RW  Size (RW Data + ZI Data)               544 (   0.53kB)
-    Total ROM Size (Code + RO Data + RW Data)       3556 (   3.47kB)
+    Total RO  Size (Code + RO Data)                 3276 (   3.20kB)
+    Total RW  Size (RW Data + ZI Data)               548 (   0.54kB)
+    Total ROM Size (Code + RO Data + RW Data)       3824 (   3.73kB)
 
 ==============================================================================
 
