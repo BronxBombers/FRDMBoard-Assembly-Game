@@ -236,23 +236,123 @@ main
 			LDR		R0,=RunStopWatch
 			MOVS	R1,#1
 			STR		R1,[R0,#0]
+			LDR		R0,=Count
+			MOVS	R1,#0
+			STR		R1,[R0,#0]
 			
-			LDR		R0,=beginningPrompt
+			LDR		R0,=Welcome
+			BL		PutStringSB
+MainLoop	LDR		R0,=beginningPrompt
 			BL		PutStringSB
 			
+			LDR		R2,=0x1FFFFFFF
+			BL		GetChar
+			MOVS	R2,#0xB
+			CMP		R0,#0x0D
+			BEQ		GameLoop
+			CMP		R0,#0x52
+			BEQ		Rules
+			CMP		R0,#0x72
+			BEQ		Rules
+			B		MainLoop
+			
+Rules		LDR		R0,=helpCommands
+			BL		PutStringSB
+			LDR		R0,=helpCommands2
+			BL		PutStringSB
+			LDR		R0,=helpCommands3
+			BL		PutStringSB
+			LDR		R0,=helpCommands4
+			BL		PutStringSB
+			LDR		R0,=helpCommands5
+			BL		PutStringSB
+			LDR		R0,=helpCommands6
+			BL		PutStringSB
+			B		MainLoop
+			
+GameLoop	SUBS	R2,R2,#1
+			LDR		R0,=roundNum
+			BL		PutStringSB
+			MOVS	R0,R2
+			BL		PutNumU
 			BL		GetRandomNumber
 			BL		Toggle_Light
-				
-			LDR		R2,=0x1FFFFFFF
-MainLoop	BL		GetChar
-			LDR		R2,=Count
-			LDR		R2,[R2,#0]
-			BL		GetRandomNumber
+			MOVS	R4,#0
+WrongAnswer	MOVS	R0,#0x3E
+			BL		PutChar
+			BL		GetChar
+			BL		PutChar
+			CMP		R1,#0
+			BEQ		NoneOn
+			CMP		R1,#1
+			BEQ		RedOn
+			CMP		R1,#2
+			BEQ		GreenOn
+			CMP		R1,#3
+			BEQ		BothOn
 			
+NoneOn		LDR		R6,=neither
+			CMP		R0,#0x4E			
+			BEQ		Right
+			CMP		R0,#0x6E
+			BEQ		Right
+			ADDS	R4,R4,#1
+			B		WrongAnswer
 			
-			
-          
+RedOn		LDR		R6,=red
+			CMP		R0,#0x52			
+			BEQ		Right
+			CMP		R0,#0x72
+			BEQ		Right
+			ADDS	R4,R4,#1
+			B		WrongAnswer
 
+GreenOn		LDR		R6,=green
+			CMP		R0,#0x47			
+			BEQ		Right
+			CMP		R0,#0x67
+			BEQ		Right
+			ADDS	R4,R4,#1
+			B		WrongAnswer
+
+BothOn		LDR		R6,=both
+			CMP		R0,#0x42			
+			BEQ		Right
+			CMP		R0,#0x62
+			BEQ		Right
+			ADDS	R4,R4,#1
+			B		WrongAnswer
+			
+Right		LDR		R3,=Count
+			LDR		R3,[R3,#0]
+			LDR		R0,=correct
+			BL		PutStringSB
+			MOVS	R0,R6
+			BL		PutStringSB
+			BL		NewLine
+			LDR		R0,=Score
+			MOVS	R1,R4
+			BL		Scoring
+			CMP		R2,#1
+			BEQ		EndOfGame
+			LDR		R0,=currentScore
+			BL		PutStringSB
+			LDR		R0,=Score
+			LDR		R0,[R0,#0]
+			BL		PutNumHex
+			BL		NewLine
+			B		GameLoop
+			
+EndOfGame	LDR		R0,=finalScore
+			BL		PutStringSB
+			LDR		R0,=Score
+			LDR		R0,[R0,#0]
+			BL		PutNumU
+			B		MainLoop
+			
+		
+
+		
        
            
 
@@ -260,6 +360,7 @@ MainLoop	BL		GetChar
 ;Stay here
             B       .
             ENDP
+			LTORG
 ;>>>>> begin subroutine code <<<<<
 
 
@@ -289,6 +390,16 @@ Init_Lights		PROC		{R0-R14}
             LDR  	R0,=FGPIOE_BASE
             LDR  	R1,=LED_PORTE_MASK
             STR  	R1,[R0,#GPIO_PDDR_OFFSET]
+			
+			;Turn off red LED
+			LDR  R0,=FGPIOE_BASE
+			LDR  R1,=LED_RED_MASK
+			STR  R1,[R0,#GPIO_PSOR_OFFSET]
+			
+			;Turn off green LED
+			LDR  R0,=FGPIOD_BASE
+			LDR  R1,=LED_GREEN_MASK
+			STR  R1,[R0,#GPIO_PSOR_OFFSET]
 	
 			POP		{R0-R2}
 			BX		LR
@@ -296,18 +407,18 @@ Init_Lights		PROC		{R0-R14}
 				
 
 ;Subroutine: Toggle Light
-;Input: R0: 0 for Red, anything else for Green
+;Input: R1: 0 for Red, anything else for Green
 
 Toggle_Light    PROC		{R0-R14}
 			PUSH			{R0-R3}
 			
-			CMP		R0,#0
+			CMP		R1,#0
 			BEQ		None
-			CMP		R0,#1
+			CMP		R1,#1
 			BEQ		Red
-			CMP		R0,#2
+			CMP		R1,#2
 			BEQ		Green
-			CMP		R0,#3
+			CMP		R1,#3
 			BEQ		BothLights
 			
 			
@@ -346,7 +457,7 @@ Green 		;Turn on green LED
 			STR  R1,[R0,#GPIO_PSOR_OFFSET]
 			B	 EndLight
 
-Both		;Turn on red LED
+BothLights		;Turn on red LED
 			LDR  R0,=FGPIOE_BASE
             LDR  R1,=LED_RED_MASK
             STR  R1,[R0,#GPIO_PCOR_OFFSET]
@@ -573,16 +684,18 @@ EndDIVU
 GetChar		PROC		{R0,R2-R14}, {}
 	
 			PUSH	{R1, LR}			;Save LR value
+			
+			MRS     R0,APSR		                ;The following lines clear the C flag without changing other values
+            MOVS    R1,#0x20
+            LSLS    R1,R1,#24
+            BICS    R0,R0,R1
+            MSR     APSR,R0
+			
             
-            LDRB    R3,=RunStopWatch
-            MOVS    R4,#1
-            STRB    R4,[R3,#0]
-            LDR     R3,=Count
-            ;LDR     R3,[R3,#0]
-keepGoing
+keepGoing	LDR     R3,=Count
             LDR     R3,[R3,#0]
-            CMP     R3,R2
-            BGE     EndWhile
+            CMP     R2,R3
+            BLE     EndWhile
             
 			CPSID	I					;Mask other interrupts
 			LDR		R1,=ReceiveQueue	;R0 gets the address of the queue ReceiveQueue
@@ -875,13 +988,20 @@ NewLine		PROC		{R0-R14}, {}
 GetRandomNumber     PROC       {R1-R14}
     
         PUSH    {R0,R2-R3, LR}
+		MRS     R0,APSR		                ;The following lines clear the C flag without changing other values
+        MOVS    R1,#0x20
+        LSLS    R1,R1,#24
+        BICS    R0,R0,R1
+        MSR     APSR,R0
         LDR     R2,=Count
         LDR     R2,[R2,#0]
 		MOVS	R1,R2
         MOVS    R0,#4
+		
         BL      DIVU
         MOVS    R0,R1
 		MOVS	R1,#0
+		LDR		R2,=Count
 		STR		R1,[R2,#0]
 		MOVS	R1,R0
         POP     {R0,R2-R3, PC}
@@ -1095,18 +1215,18 @@ __Vectors_Size  EQU     __Vectors_End - __Vectors
 
             AREA    MyConst,DATA,READONLY
 ;>>>>> begin constants here <<<<<
-
-beginningPrompt DCB     0x0D, "Welcome to Color Match!", 0x0A, 0x0D, "Press 'Enter' to start and 'R' for rules.", 0x0A, 0x0D, 0
+Welcome			DCB		0x0D, "Welcome to Color Match!",0x0A,0x0D,0
+beginningPrompt DCB     0x0D,"Press 'Enter' to start and 'R' for rules.", 0x0A, 0x0D, 0
 helpCommands    DCB     0x0D, "RULES:", 0x0A, 0x0D, "LEDSs will light up on the microcontroller once the game begins.", 0x0A, 0x0D, 0
-helpCommands2   DCB     0x0D, "If one LED is lit, press 'R' if the red LED is lit and 'G' if the green LED is lit." 0x0A, 0x0D, 0
+helpCommands2   DCB     0x0D, "Press 'R' if the red LED is lit and 'G' if the green LED is lit.", 0x0A, 0x0D, 0
 helpCommands3   DCB     0x0D, "If both are lit, press 'B' and if neither are lit, press 'N'.", 0x0A, 0x0D, 0
-helpCommands4   DCB     0x0D, "Wrong answers reduce the value of getting the right answer." 0x0A, 0x0D, 0
-helpCommands5   DCB     0x0D, "The further the round, the faster and harder the game gets." 0x0A, 0x0D, 0 
+helpCommands4   DCB     0x0D, "Wrong answers reduce the value of getting the right answer.", 0x0A, 0x0D, 0
+helpCommands5   DCB     0x0D, "The further the round, the faster and harder the game gets.", 0x0A, 0x0D, 0 
 helpCommands6   DCB     0x0D, "The faster the correct answer, the more points you get! Good Luck!", 0x0A, 0x0D, 0
 
-correct         DCB     0x0D, ":   Correct--color was ", 0
-wrong           DCB     0x0D, ":   Wrong", 0x0A, 0x0D, 0
-outOfTime       DCB     0x0D, ":   Out of time--color was ", 0
+correct         DCB     ":   Correct--color was ", 0
+wrong           DCB     ":   Wrong", 0x0A, 0x0D, 0
+outOfTime       DCB     ":   Out of time--color was ", 0
 red             DCB     "red", 0x0D, 0x0A, 0
 green           DCB     "green", 0x0D, 0x0A, 0
 both            DCB     "both", 0x0D, 0x0A, 0
@@ -1114,6 +1234,8 @@ neither         DCB     "neither", 0x0D, 0x0A, 0
 
 currentScore    DCB     "Current Score: ", 0
 finalScore      DCB     "Final Score: ", 0 
+
+roundNum		DCB		"Round Number: ",0
 
 ;>>>>>   end constants here <<<<<
             ALIGN
@@ -1135,6 +1257,8 @@ RunStopWatch		SPACE		1           ;Byte value representing a stopwatch
 Count				SPACE		4           ;Count value representing 10 ms for each value
 					ALIGN
 HoldingAddress		SPACE		MAX_STRING  ;The address to hold the input string for GetString
+					ALIGN
+Score				SPACE		4
                     
 ;>>>>>   end variables here <<<<<
             ALIGN
