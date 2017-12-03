@@ -3,7 +3,7 @@
 <title>Static Call Graph - [.\Objects\Exercise12.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\Exercise12.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sat Dec 02 19:30:54 2017
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060528: Last Updated: Sat Dec 02 21:45:17 2017
 <BR><P>
 <H3>Maximum Stack Usage =          0 bytes + Unknown(Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
@@ -44,7 +44,7 @@ Global Symbols
 <P><STRONG><a name="[2]"></a>HardFault_Handler</STRONG> (Thumb, 0 bytes, Stack size 0 bytes, start.o(Start))
 <BR>[Address Reference Count : 1]<UL><LI> exercise12.o(RESET)
 </UL>
-<P><STRONG><a name="[5]"></a>Reset_Handler</STRONG> (Thumb, 296 bytes, Stack size 0 bytes, exercise12.o(MyCode))
+<P><STRONG><a name="[5]"></a>Reset_Handler</STRONG> (Thumb, 368 bytes, Stack size 0 bytes, exercise12.o(MyCode))
 <BR><BR>[Calls]<UL><LI><a href="#[16]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Startup
 <LI><a href="#[15]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PutChar
 <LI><a href="#[14]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Scoring
@@ -109,7 +109,7 @@ Local Symbols
 <LI><a href="#[a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PutNumU
 </UL>
 
-<P><STRONG><a name="[c]"></a>GetChar</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, exercise12.o(MyCode))
+<P><STRONG><a name="[c]"></a>GetChar</STRONG> (Thumb, 66 bytes, Stack size 0 bytes, exercise12.o(MyCode))
 <BR><BR>[Calls]<UL><LI><a href="#[12]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DeQueue
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler
@@ -141,7 +141,7 @@ Local Symbols
 <BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler
 </UL>
 
-<P><STRONG><a name="[10]"></a>GetRandomNumber</STRONG> (Thumb, 40 bytes, Stack size 0 bytes, exercise12.o(MyCode))
+<P><STRONG><a name="[10]"></a>GetRandomNumber</STRONG> (Thumb, 42 bytes, Stack size 0 bytes, exercise12.o(MyCode))
 <BR><BR>[Calls]<UL><LI><a href="#[b]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;DIVU
 </UL>
 <BR>[Called By]<UL><LI><a href="#[5]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;Reset_Handler

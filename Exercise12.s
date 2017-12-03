@@ -239,13 +239,14 @@ main
 			LDR		R0,=Count
 			MOVS	R1,#0
 			STR		R1,[R0,#0]
+       
 			
 			LDR		R0,=Welcome
 			BL		PutStringSB
 MainLoop	LDR		R0,=beginningPrompt
 			BL		PutStringSB
 			
-			LDR		R2,=0x1FFFFFFF
+			LDR		R2,=0x0000FFFF
 			BL		GetChar
 			MOVS	R5,#0
 			MOVS	R2,#0xB
@@ -284,6 +285,7 @@ GameLoop	SUBS	R2,R2,#1
 WrongAnswer	MOVS	R0,#0x3E
 			BL		PutChar
 			BL		GetChar
+            BCS     OutofTime
 			BL		PutChar
 			CMP		R1,#0
 			BEQ		NoneOn
@@ -293,7 +295,7 @@ WrongAnswer	MOVS	R0,#0x3E
 			BEQ		GreenOn
 			CMP		R1,#3
 			BEQ		BothOn
-			
+            
 NoneOn		LDR		R6,=neither
 			CMP		R0,#0x4E			
 			BEQ		Right
@@ -335,9 +337,10 @@ Right		LDR		R3,=Count
 			BL		NewLine
 			LDR		R0,=Score
 			MOVS	R1,R4
+            MOVS    R7,R2
 			MOVS	R2,R5
 			BL		Scoring
-			CMP		R2,#10
+			CMP		R5,#10
 			BEQ		EndOfGame
 			LDR		R0,=currentScore
 			BL		PutStringSB
@@ -345,13 +348,47 @@ Right		LDR		R3,=Count
 			LDR		R0,[R0,#0]
 			BL		PutNumHex
 			BL		NewLine
+            MOVS    R2,R7
 			B		GameLoop
-			
+
+OutofTime   LDR     R0,=outOfTime
+            BL      PutStringSB
+            CMP		R1,#0
+			BEQ		NoneOnWRONG
+			CMP		R1,#1
+			BEQ		RedOnWRONG
+			CMP		R1,#2
+			BEQ		GreenOnWRONG
+			CMP		R1,#3
+			BEQ		BothOnWRONG
+backtoLOOP  MOVS    R0,R6
+            BL      PutStringSB
+            LDR		R0,=Score
+			LDR		R0,[R0,#0]
+			BL		PutNumHex
+			BL		NewLine
+            CMP     R5,#10
+            BEQ     EndOfGame
+            B       GameLoop
+
+NoneOnWRONG LDR     R6,=neither
+            B       backtoLOOP
+
+RedOnWRONG  LDR     R6,=red
+            B       backtoLOOP
+            
+GreenOnWRONG LDR    R6,=green
+            B       backtoLOOP
+
+BothOnWRONG LDR     R6,=both
+            B       backtoLOOP
+
 EndOfGame	LDR		R0,=finalScore
 			BL		PutStringSB
 			LDR		R0,=Score
 			LDR		R0,[R0,#0]
 			BL		PutNumU
+            BL      NewLine
 			B		MainLoop
 			
 		
@@ -408,7 +445,7 @@ Init_Lights		PROC		{R0-R14}
 			POP		{R0-R2}
 			BX		LR
 			ENDP
-				
+			LTORG
 
 ;Subroutine: Toggle Light
 ;Input: R1: 0 for Red, anything else for Green
@@ -685,7 +722,7 @@ EndDIVU
 ;R2 gets the time it should take for the round to run. 
 ;Output:
 ;R0 : Dequeued character into R0
-GetChar		PROC		{R0,R2-R14}, {}
+GetChar		PROC		{R1-R14}, {}
 	
 			PUSH	{R1-R4, LR}			;Save LR value
 			
@@ -696,20 +733,31 @@ GetChar		PROC		{R0,R2-R14}, {}
             MSR     APSR,R0
 			
 			LDR     R3,=Count
+            MOVS    R4,#0
+            STR     R4,[R3,#0]
             LDR     R3,[R3,#0]
 			MOVS	R4,#100
             MULS	R2,R4,R2
 keepGoing	
+            CPSID	I           ;Mask other interrupts
+            LDR     R3,=Count
+            LDR     R3,[R3,#0]
             CMP     R2,R3
-            BLE     EndWhile
-            
-			CPSID	I					;Mask other interrupts
+            BLE     SetCarry
+            					
 			LDR		R1,=ReceiveQueue	;R0 gets the address of the queue ReceiveQueue
 			BL		DeQueue				;Dequeue from ReceiveQueue
 			CPSIE	I					;Unmask other interrupts
 			BCS		keepGoing			;If the carry flag was set, go to keepGoing
-EndWhile	
-			POP		{R1-R2, PC}			;Restore PC value
+            B       EndWhile
+
+SetCarry	MRS     R1,APSR		                ;The following lines set the C flag without changing any other values
+            MOVS    R2,#0x20
+            LSLS    R2,R2,#24
+            ORRS    R1,R1,R2
+            MSR     APSR,R1
+            
+EndWhile	POP		{R1-R4, PC}			;Restore PC value
 			ENDP
 
 
@@ -718,7 +766,8 @@ EndWhile
 ;Output:
 ;R0 : Dequeued character into R0
 PutChar     PROC    {R1-R14},{}
-			PUSH	{R0-R2, LR}			;Save R0-R2 and LR values
+            PUSH	{R0-R2, LR}			;Save R0-R2 and LR values
+         
 keepGoing2
 			CPSID	I					;Mask other interrupts
 			LDR		R1,=TransmitQueue	;R0 gets the address of the queue TransmitQueue
@@ -730,7 +779,7 @@ EndingWhile
 			LDR		R2,=UART0_BASE
 			STRB	R1,[R2,#UART0_C2_OFFSET]	;Store the value of UART0_C2_TI_RI into TransmitQueue with offset UART_C2_OFFSET
 			POP		{R0-R2, PC}			;Restore R0-R2 and PC values
-			ENDP
+            ENDP
 			
 
 ;This is for the ISR that will handle UART0 transmit and receive interrupts: UART0_ISR
@@ -1002,6 +1051,7 @@ GetRandomNumber     PROC       {R1-R14}
         LDR     R2,=Count
         LDR     R2,[R2,#0]
 		MOVS	R1,R2
+        MULS    R1,R1,R1
         MOVS    R0,#4
 		
         BL      DIVU
@@ -1258,7 +1308,7 @@ helpCommands6   DCB     0x0D, "The faster the correct answer, the more points yo
 
 correct         DCB     ":   Correct--color was ", 0
 wrong           DCB     ":   Wrong", 0x0A, 0x0D, 0
-outOfTime       DCB     ":   Out of time--color was ", 0
+outOfTime       DCB     "X:   Out of time--color was ", 0
 red             DCB     "red", 0x0D, 0x0A, 0
 green           DCB     "green", 0x0D, 0x0A, 0
 both            DCB     "both", 0x0D, 0x0A, 0
@@ -1268,6 +1318,7 @@ currentScore    DCB     "Current Score: ", 0
 finalScore      DCB     "Final Score: ", 0 
 
 roundNum		DCB		"Round Number: ",0
+
 
 ;>>>>>   end constants here <<<<<
             ALIGN
@@ -1291,7 +1342,9 @@ Count				SPACE		4           ;Count value representing 10 ms for each value
 HoldingAddress		SPACE		MAX_STRING  ;The address to hold the input string for GetString
 					ALIGN
 Score				SPACE		4
-                    
+                    ALIGN
+OverallWRONG        SPACE       4
+                    ALIGN
 ;>>>>>   end variables here <<<<<
             ALIGN
             END
