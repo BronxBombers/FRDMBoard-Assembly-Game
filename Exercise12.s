@@ -228,35 +228,40 @@ main
 ;>>>>> begin main program code <<<<<
             ;Initialize the UART0_IRQ
 			CPSID	I
-			BL		Init_UART0_IRQ
-			BL		Init_PIT_IRQ
-			BL		Init_Lights
+			BL		Init_UART0_IRQ      ;Initialize IRQ
+			BL		Init_PIT_IRQ        ;Initialize PIT
+			BL		Init_Lights         ;Initialize Lights
 			CPSIE	I
 			
-			LDR		R0,=RunStopWatch
-			MOVS	R1,#1
-			STR		R1,[R0,#0]
-			LDR		R0,=Count
+			LDR		R0,=RunStopWatch    ;Load the Stopwatch 
+			MOVS	R1,#1               
+			STR		R1,[R0,#0]          ;Start the Stopwatch
+			LDR		R0,=Count           ;Load the count
 			MOVS	R1,#0
-			STR		R1,[R0,#0]
-       
+			STR		R1,[R0,#0]          ;Clear count
+            
+            
 			
-			LDR		R0,=Welcome
-			BL		PutStringSB
-MainLoop	LDR		R0,=beginningPrompt
-			BL		PutStringSB
+			LDR		R0,=Welcome         ;Load Welcome constant
+			BL		PutStringSB         ;Print Welcome constant
+MainLoop	LDR		R0,=beginningPrompt ;Load beginningPrompt constant
+			BL		PutStringSB         ;Print beginningPrompt constant
 			
-			LDR		R2,=0x0000FFFF
-			BL		GetChar
-			MOVS	R5,#0
-			MOVS	R2,#0xB
-			CMP		R0,#0x0D
-			BEQ		GameLoop
-			CMP		R0,#0x52
-			BEQ		Rules
-			CMP		R0,#0x72
-			BEQ		Rules
-			B		MainLoop
+            LDR     R0,=Score
+            MOVS    R1,#0
+            STR     R1,[R0,#0]
+            
+			LDR		R2,=0x0000FFFF      ;R2 gets a large value, so that the first prompt isn't skipped over
+			BL		GetChar             ;Get a character from the uesr
+			MOVS	R5,#0               ;R5 gets 0
+			MOVS	R2,#11              ;R2 gets 11, the seconds counter
+			CMP		R0,#0x0D            ;Comparing R0 to the enter key
+			BEQ		GameLoop            ;If it was hit, go to GameLoop
+			CMP		R0,#0x52            ;Otherwise, compare R0 to 'R'
+			BEQ		Rules               ;If 'R', go to Rules
+			CMP		R0,#0x72            ;Otherwise, compare R0 to 'r'
+			BEQ		Rules               ;If 'r', go to Rules
+			B		MainLoop            ;Go to MainLoop
 			
 Rules		LDR		R0,=helpCommands
 			BL		PutStringSB
@@ -272,20 +277,20 @@ Rules		LDR		R0,=helpCommands
 			BL		PutStringSB
 			B		MainLoop
 			
-GameLoop	SUBS	R2,R2,#1
-			ADDS	R5,R5,#1
-			LDR		R0,=roundNum
-			BL		PutStringSB
-			MOVS	R0,R5
-			BL		PutNumU
-			BL		NewLine
-			BL		GetRandomNumber
-			BL		Toggle_Light
-			MOVS	R4,#0
-WrongAnswer	MOVS	R0,#0x3E
-			BL		PutChar
-			BL		GetChar
-            BCS     OutofTime
+GameLoop	SUBS	R2,R2,#1            ;Decrement the number of seconds for the round by 1
+			ADDS	R5,R5,#1            ;Increment the round number by 1
+			LDR		R0,=roundNum        ;R0 gets the constant roundNum
+			BL		PutStringSB         ;Print the constant roundNum to the screen
+			MOVS	R0,R5               ;R0 gets the number of rounds
+			BL		PutNumU             ;Print the number of rounds
+			BL		NewLine             ;Print a new line
+			BL		GetRandomNumber     ;Get a new random number
+			BL		Toggle_Light        ;Toggle the lights based on the new number
+			MOVS	R4,#0               ;R4 gets 0, representing the total number of incorrect guesses so far
+WrongAnswer	MOVS	R0,#'>'             ;R0 gets '>'
+			BL		PutChar             ;Print '>'
+			BL		GetChar             ;Get a character from the user
+            BCS     OutofTime           ;
 			BL		PutChar
 			CMP		R1,#0
 			BEQ		NoneOn
@@ -328,25 +333,26 @@ BothOn		LDR		R6,=both
 			ADDS	R4,R4,#1
 			B		WrongAnswer
 			
-Right		LDR		R3,=Count
-			LDR		R3,[R3,#0]
+Right		
 			LDR		R0,=correct
 			BL		PutStringSB
 			MOVS	R0,R6
-			BL		PutStringSB
-			BL		NewLine
-			LDR		R0,=Score
-			MOVS	R1,R4
-            MOVS    R7,R2
-			MOVS	R2,R5
-			BL		Scoring
-			CMP		R5,#10
-			BEQ		EndOfGame
-			LDR		R0,=currentScore
-			BL		PutStringSB
-			LDR		R0,=Score
-			LDR		R0,[R0,#0]
-			BL		PutNumHex
+			BL		PutStringSB         ;Print color of LED
+			BL		NewLine             ;Print new line
+			LDR		R0,=Score           ;R0 gets Score
+			MOVS	R1,R4               ;R1 gets number of wrong answers
+            MOVS    R7,R2               ;R7 gets number of seconds for this round
+			MOVS	R2,R5               ;R2 gets round number
+            LDR		R3,=Count           
+			LDR		R3,[R3,#0]          ;R3 gets the time it took
+			BL		Scoring             ;Change the scoring
+			CMP		R5,#10              ;Check if this is the last round
+			BEQ		EndOfGame           ;If so, go to EndOfGame
+			LDR		R0,=currentScore    ;R0 gets constant currentScore
+			BL		PutStringSB         ;Print the constant currentScore to the screen
+			LDR		R0,=Score           ;R0 gets Score
+			LDR		R0,[R0,#0]          ;R0 gets the value of Score
+			BL		PutNumU             ;Print the value of Score to the screen
 			BL		NewLine
             MOVS    R2,R7
 			B		GameLoop
@@ -363,9 +369,11 @@ OutofTime   LDR     R0,=outOfTime
 			BEQ		BothOnWRONG
 backtoLOOP  MOVS    R0,R6
             BL      PutStringSB
+            LDR     R0,=currentScore
+            BL      PutStringSB
             LDR		R0,=Score
 			LDR		R0,[R0,#0]
-			BL		PutNumHex
+			BL		PutNumU
 			BL		NewLine
             CMP     R5,#10
             BEQ     EndOfGame
@@ -383,11 +391,16 @@ GreenOnWRONG LDR    R6,=green
 BothOnWRONG LDR     R6,=both
             B       backtoLOOP
 
-EndOfGame	LDR		R0,=finalScore
+EndOfGame	BL      NewLine
+            LDR		R0,=finalScore
 			BL		PutStringSB
 			LDR		R0,=Score
 			LDR		R0,[R0,#0]
 			BL		PutNumU
+            BL      NewLine
+            MOVS    R1,#0
+            BL      Toggle_Light
+            BL      NewLine
             BL      NewLine
 			B		MainLoop
 			
@@ -448,7 +461,7 @@ Init_Lights		PROC		{R0-R14}
 			LTORG
 
 ;Subroutine: Toggle Light
-;Input: R1: 0 for Red, anything else for Green
+;Input: R1: 0 for neither, 1 for red, 2 for green, 3 for both
 
 Toggle_Light    PROC		{R0-R14}
 			PUSH			{R0-R3}
@@ -595,7 +608,7 @@ PutNumU		PROC 	{R0-R14}, {}
 			PUSH 	{R0-R2, LR}     ;Store the values of R0-R2 and LR
             MOVS    R2,#0           ;Set R2 equal to 0
             CMP     R0,#0           ;Comparing the number size to 0
-            BEQ     WhileR2Not0     ;If the size is 0, go to WhileR2Not0
+            BEQ     JustPrint0      ;If the size is 0, go to WhileR2Not0
 PutNumULoop	MOVS	R1,R0		    ;R1 has the length of the string
 			MOVS	R0,#10		    ;R0 gets 10
 			BL		DIVU		    ;Divide R1 (the length) by R0 (10) to get a quotient and denominator, 
@@ -613,7 +626,10 @@ WhileR2Not0 CMP     R2,#0           ;Comparing the number of things added to the
             BL      PutChar         ;Print that value to the screen
             SUBS    R2,R2,#1        ;Decrement the number of items that are left to take from the stack 
             B       WhileR2Not0     ;Go to WhileR2Not0
-		
+
+JustPrint0
+            MOVS    R0,#'0'
+            BL      PutChar
 Ending
 			POP		{R0-R2, PC}     ;Restore the values of R0-R2 and PC
 			ENDP
@@ -726,7 +742,7 @@ GetChar		PROC		{R1-R14}, {}
 	
 			PUSH	{R1-R4, LR}			;Save LR value
 			
-			MRS     R0,APSR		                ;The following lines clear the C flag without changing other values
+			MRS     R0,APSR		        ;The following lines clear the C flag without changing other values
             MOVS    R1,#0x20
             LSLS    R1,R1,#24
             BICS    R0,R0,R1
@@ -1051,7 +1067,6 @@ GetRandomNumber     PROC       {R1-R14}
         LDR     R2,=Count
         LDR     R2,[R2,#0]
 		MOVS	R1,R2
-        MULS    R1,R1,R1
         MOVS    R0,#4
 		
         BL      DIVU
@@ -1219,6 +1234,8 @@ Scoring        PROC     {R1-R14}
 
         BL      DIVU        ;R0 gets score
         
+        LDR     R1,[R6,#0]
+        ADDS    R0,R1,R0
         STR     R0,[R6,#0]
         
         POP     {R0-R7, PC}
