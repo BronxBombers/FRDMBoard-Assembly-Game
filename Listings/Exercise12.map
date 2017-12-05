@@ -65,7 +65,7 @@ Image Symbol Table
     finalScore                               0x00000d71   Data          14  exercise12.o(MyConst)
     roundNum                                 0x00000d7f   Data          15  exercise12.o(MyConst)
     .ARM.__at_0x1FFFE000                     0x1fffe000   Section      256  start.o(.ARM.__at_0x1FFFE000)
-    MyData                                   0x1fffe100   Section      296  exercise12.o(MyData)
+    MyData                                   0x1fffe100   Section      292  exercise12.o(MyData)
     TransmitQueue                            0x1fffe100   Data          18  exercise12.o(MyData)
     ReceiveQueue                             0x1fffe114   Data          18  exercise12.o(MyData)
     QBufferTransmit                          0x1fffe128   Data          80  exercise12.o(MyData)
@@ -97,7 +97,7 @@ Memory Map of the image
 
   Image Entry point : 0x00000411
 
-  Load Region LR_1 (Base: 0x00000000, Size: 0x00000fb8, Max: 0xffffffff, ABSOLUTE)
+  Load Region LR_1 (Base: 0x00000000, Size: 0x00000fb4, Max: 0xffffffff, ABSOLUTE)
 
     Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000d90, Max: 0xffffffff, ABSOLUTE)
 
@@ -112,15 +112,15 @@ Memory Map of the image
     0x00000b24   0x00000b24   0x0000026c   Data   RO            3    MyConst             exercise12.o
 
 
-    Execution Region ER_RW (Exec base: 0x1fffe000, Load base: 0x00000d90, Size: 0x00000228, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RW (Exec base: 0x1fffe000, Load base: 0x00000d90, Size: 0x00000224, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
     0x1fffe000   0x00000d90   0x00000100   Data   RW           13    .ARM.__at_0x1FFFE000  start.o
-    0x1fffe100   0x00000e90   0x00000128   Data   RW            4    MyData              exercise12.o
+    0x1fffe100   0x00000e90   0x00000124   Data   RW            4    MyData              exercise12.o
 
 
-    Execution Region ER_ZI (Exec base: 0x1fffe228, Load base: 0x00000fb8, Size: 0x00000000, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_ZI (Exec base: 0x1fffe224, Load base: 0x00000fb4, Size: 0x00000000, Max: 0xffffffff, ABSOLUTE)
 
     **** No section assigned to this execution region ****
 
@@ -132,11 +132,11 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      1812        364        812        296          0       1912   exercise12.o
+      1812        364        812        292          0       1908   exercise12.o
        268         58         64        256          0        768   start.o
 
     ----------------------------------------------------------------------
-      2596        938        876        552          0       2680   Object Totals
+      2596        938        876        548          0       2676   Object Totals
          0          0          0          0          0          0   (incl. Generated)
        516        516          0          0          0          0   (incl. Padding)
 
@@ -151,15 +151,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      2596        938        876        552          0       2576   Grand Totals
-      2596        938        876        552          0       2576   ELF Image Totals
-      2596        938        876        552          0          0   ROM Totals
+      2596        938        876        548          0       2572   Grand Totals
+      2596        938        876        548          0       2572   ELF Image Totals
+      2596        938        876        548          0          0   ROM Totals
 
 ==============================================================================
 
     Total RO  Size (Code + RO Data)                 3472 (   3.39kB)
-    Total RW  Size (RW Data + ZI Data)               552 (   0.54kB)
-    Total ROM Size (Code + RO Data + RW Data)       4024 (   3.93kB)
+    Total RW  Size (RW Data + ZI Data)               548 (   0.54kB)
+    Total ROM Size (Code + RO Data + RW Data)       4020 (   3.93kB)
 
 ==============================================================================
 

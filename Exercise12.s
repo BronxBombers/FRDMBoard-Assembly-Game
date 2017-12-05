@@ -1,15 +1,21 @@
-            TTL Lab Exercise Ten: Timer Driver Input Timing
+            TTL Lab Exercise Twelve: Game
 ;****************************************************************
-;This program takes in inputs from the user for their name, the 
-;date, and the last name of a TA for the lab section. For each
-;of those inputs, the user is timed to see how long it took them
-;to enter those inputs. The total time it took them for each input
-;is printed to the screen after they hit the enter key to confirm
-;the input. 
-;Name:  Matthew Rigby
-;Date:  11/13/17
+;This program uses two light up LED's on the microcontroller to 
+;play a game wiht the user. The user is prompted to play the game,
+;by pressing the enter key, or pressing 'R' for the rules. There 
+;are 10 total rounds to the game, starting at 10 seconds for the 
+;first round and decrementing one second per round, until there is
+;only one second to answer in the last round. The objective of the
+;game is to press the key on the keyboard cooresponding to the lit
+;up LED on the board (G for green, R for red, B for both, N for neither)
+;as fast as possible each round to get the maximum number of points. 
+;Wrong answers reduce the score earned that round by half for each
+;wrong input. There is also a time multiplier for the user, so the
+;faster the correct input, the better the score. 
+;Names:  Matthew Rigby and Zachary Morgan
+;Date:  12/5/17
 ;Class:  CMPE-250
-;Section:  Lab Section 01, Wednesday's from 5:30PM - 7:30PM
+;Section:  Lab Section 05, Wednesday's from 5:30PM - 7:30PM
 ;---------------------------------------------------------------
 ;Keil Template for KL46
 ;R. W. Melton
@@ -403,13 +409,7 @@ EndOfGame	BL      NewLine
             BL      NewLine
             BL      NewLine
 			B		MainLoop
-			
-		
-
-		
-       
-           
-
+         
 ;>>>>>   end main program code <<<<<
 ;Stay here
             B       .
@@ -633,44 +633,6 @@ JustPrint0
 Ending
 			POP		{R0-R2, PC}     ;Restore the values of R0-R2 and PC
 			ENDP
-			
-
-
-
-GetStringSB			PROC {R0-R14}, {}
-
-			PUSH	{R0-R3,LR}	;Store current values of R2 and R3
-			MOVS	R2,R0		;R2 has address
-			MOVS	R3,#0		;R3 is counter
-            SUBS    R1,R1,#2    ;Leaving space for the null character
-            			
-While		BL		GetChar		;Get next Char
-			CMP		R0,#0x0D	;If R0 is the enter key...
-			BEQ		EndLoop		;Go to EndLoop
-            CMP     R0,#0x1F	;Comparing R0 to any of the control characters
-            BLE     While		;If R0 is any control character other than backspace and enter, got to While
-			CMP		R0,#0x7F	;Otherwise, if R0 is the backspace key...
-			BEQ		BackS		;Go to BackS
-			CMP		R1,R3		;Otherwise, if R3 is the same as the length of the buffer...
-			BLT		While		;Go to while
-			BL		PutChar		;Prints the character	
-			STRB	R0,[R2,R3]	;Store the value in R0 into memory location R2 with offset R3
-            ADDS	R3,R3,#1    ;Otherwise, counter increments
-			B		While		;Go to while
-		
-BackS		CMP		R3,#0		;If the length of the string is 0...
-			BEQ		While		;Go to while
-			SUBS	R3,R3,#1	;Otherwise, counter is decremented
-			BL		PutChar		;Shows the backspace on the screen
-			B		While		;Go to while
-			
-EndLoop
-			
-			MOVS	R0,#0		;R0 gets 0
-			STRB	R0,[R2,R3]	;Stores the last memory location of the string with a null value. 
-			POP		{R0-R3,PC}
-			ENDP
-
 
 
 ;This subroutine divides two numbers and returns the result of the division, as
@@ -728,11 +690,7 @@ EndDIVU
             BX  	LR			                ;Return to main program 
             ENDP
                 
-                
-;Matthew Rigby
-;Assembly Language Lab 9 Prelab
-;Lab Section 1, Wednesdays from 5:30PM - 7:30PM
-
+               
 ;This subroutine dequeues a character from the ReceiveQueue and returns it into register R0.
 ;Input Parameters:
 ;R2 gets the time it should take for the round to run. 
@@ -1014,6 +972,7 @@ Init_PIT_IRQ		PROC	{R0-R14},{}
 		BX		LR
 		ENDP
 		
+        
 ;This is where the interrupt for the PIT_ISR leads to. This section of code handles running and
 ;incrementing a variable named Count that is incremented once every 10 ms, assuming that the 
 ;stop watch is running. In either case, where the stopwatch is running or if it isn't, the PIT
@@ -1046,7 +1005,6 @@ ClearInterrupt
 ;No input parameters.
 ;Prints out a new line to the terminal. 
 NewLine		PROC		{R0-R14}, {}
-;Keep
         PUSH	{R0, LR}
         MOVS	R0,#0x0A		;Move the value hex A into R0, which is the ascii value for NL, or new line.
         BL		PutChar			;Print the value of the ascii number in R0 to the screen, so a new line is printed. 
@@ -1056,6 +1014,13 @@ NewLine		PROC		{R0-R14}, {}
         ENDP
 		
 	
+;This is the GetRandomNumber subroutine, which returns a random number from 0-3, inclusive, in register 1. 
+;This is determined based on the count variable, which is counting the number of 10ms it took for the user to
+;input the last value. 
+;Input parameters:
+;None
+;Output parameters: 
+;None
 GetRandomNumber     PROC       {R1-R14}
     
         PUSH    {R0,R2-R3, LR}
@@ -1213,24 +1178,31 @@ EndEnQueue
             BX		LR
             ENDP
 
-
+;This is the Scoring subroutine, which adds to the Score variable of the game and 
+;changes the player's score each round. The first round is worth 100 points, and each
+;round following is worth 100 more than the last. That score, with a times multiplier
+;equal to (2 - (.1 * seconds it took to answer )) is added to the score variables current
+;amount. The score to be added that round is divided by 2 for each incorrect answer. 
+;Input Parameters:
 ;R0 : Pointer to Score Variable
 ;R1 : Number of Incorrect Answers
 ;R2 : Round Number
 ;R3 : Time it took
+;Output Parameters:
+;No output into registers, but the Score variable changes
 Scoring        PROC     {R1-R14}
         
         PUSH    {R0-R7, LR}
         MOVS    R6,R0       ;R6 gets saved address
-        MOVS    R5,#100  ;R5 gets 100
-        MULS    R2,R5,R2 ;R2 gets the round number times 100
-        LSRS    R2,R2,R1 ;R2 gets value after incorrect number of answers
+        MOVS    R5,#100     ;R5 gets 100
+        MULS    R2,R5,R2    ;R2 gets the round number times 100
+        LSRS    R2,R2,R1    ;R2 gets value after incorrect number of answers
         
         LDR     R1,=2000    ;R1 gets 2000
         SUBS    R1,R1,R3    ;R1 gets time multiplier (2000 - 500 (5seconds) = 1500)
         MULS    R1,R2,R1    ;Multiply above score times multiplier (before division of 1000)
         
-        LDR     R0,=1000     ;R0 gets denominator (divide score by 1000)
+        LDR     R0,=1000    ;R0 gets denominator (divide score by 1000)
 
         BL      DIVU        ;R0 gets score
         
@@ -1314,8 +1286,10 @@ __Vectors_Size  EQU     __Vectors_End - __Vectors
 
             AREA    MyConst,DATA,READONLY
 ;>>>>> begin constants here <<<<<
-Welcome			DCB		0x0D, "Welcome to Color Match!",0x0A,0x0D,0
-beginningPrompt DCB     0x0D,"Press 'Enter' to start and 'R' for rules.", 0x0A, 0x0D, 0
+Welcome			DCB		0x0D, "Welcome to Color Match!",0x0A,0x0D,0     ;First prompt of the game
+beginningPrompt DCB     0x0D,"Press 'Enter' to start and 'R' for rules.", 0x0A, 0x0D, 0     ;Instructions prompt to start game or see rules
+
+;The following commands are the rules for the game, printed only when the user wants to see the rules 
 helpCommands    DCB     0x0D, "RULES:", 0x0A, 0x0D, "LEDSs will light up on the microcontroller once the game begins.", 0x0A, 0x0D, 0
 helpCommands2   DCB     0x0D, "Press 'R' if the red LED is lit and 'G' if the green LED is lit.", 0x0A, 0x0D, 0
 helpCommands3   DCB     0x0D, "If both are lit, press 'B' and if neither are lit, press 'N'.", 0x0A, 0x0D, 0
@@ -1323,18 +1297,18 @@ helpCommands4   DCB     0x0D, "Wrong answers reduce the value of getting the rig
 helpCommands5   DCB     0x0D, "The further the round, the faster and harder the game gets.", 0x0A, 0x0D, 0 
 helpCommands6   DCB     0x0D, "The faster the correct answer, the more points you get! Good Luck!", 0x0A, 0x0D, 0
 
-correct         DCB     ":   Correct--color was ", 0
-wrong           DCB     ":   Wrong", 0x0A, 0x0D, 0
-outOfTime       DCB     "X:   Out of time--color was ", 0
-red             DCB     "red", 0x0D, 0x0A, 0
-green           DCB     "green", 0x0D, 0x0A, 0
-both            DCB     "both", 0x0D, 0x0A, 0
-neither         DCB     "neither", 0x0D, 0x0A, 0
+correct         DCB     ":   Correct--color was ", 0        ;Used for when the user inputs the correct answer
+wrong           DCB     ":   Wrong", 0x0A, 0x0D, 0          ;Used for when the user inputs the wrong answer
+outOfTime       DCB     "X:   Out of time--color was ", 0   ;Used for when the user runs out of time
+red             DCB     "red", 0x0D, 0x0A, 0                ;The color red
+green           DCB     "green", 0x0D, 0x0A, 0              ;The color green
+both            DCB     "both", 0x0D, 0x0A, 0               ;The "color" both
+neither         DCB     "neither", 0x0D, 0x0A, 0            ;The "color" neither
 
-currentScore    DCB     "Current Score: ", 0
-finalScore      DCB     "Final Score: ", 0 
+currentScore    DCB     "Current Score: ", 0                ;Used when printing out the current score
+finalScore      DCB     "Final Score: ", 0                  ;Used when printing out the final score
 
-roundNum		DCB		"Round Number: ",0
+roundNum		DCB		"Round Number: ",0                  ;Used for the round number
 
 
 ;>>>>>   end constants here <<<<<
@@ -1358,10 +1332,8 @@ Count				SPACE		4           ;Count value representing 10 ms for each value
 					ALIGN
 HoldingAddress		SPACE		MAX_STRING  ;The address to hold the input string for GetString
 					ALIGN
-Score				SPACE		4
-                    ALIGN
-OverallWRONG        SPACE       4
-                    ALIGN
+Score				SPACE		4           ;This variable holds the score for the game
+                   
 ;>>>>>   end variables here <<<<<
             ALIGN
             END
