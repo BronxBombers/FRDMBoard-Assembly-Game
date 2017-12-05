@@ -1,13 +1,10 @@
-            TTL Lab Exercise Ten: Timer Driver Input Timing
+            TTL Lab Exercise Twelve: Light Game
 ;****************************************************************
-;This program takes in inputs from the user for their name, the 
-;date, and the last name of a TA for the lab section. For each
-;of those inputs, the user is timed to see how long it took them
-;to enter those inputs. The total time it took them for each input
-;is printed to the screen after they hit the enter key to confirm
-;the input. 
-;Name:  Matthew Rigby
-;Date:  11/13/17
+;A interactive game using the UART for user input and PIT timer and
+;KL46Z LED Lights.
+;
+;Name:  Matthew Rigby and Zach Morgan
+;Date:  12/5/17
 ;Class:  CMPE-250
 ;Section:  Lab Section 01, Wednesday's from 5:30PM - 7:30PM
 ;---------------------------------------------------------------
@@ -247,7 +244,7 @@ main
 MainLoop	LDR		R0,=beginningPrompt ;Load beginningPrompt constant
 			BL		PutStringSB         ;Print beginningPrompt constant
 			
-            LDR     R0,=Score
+            LDR     R0,=Score			;Initialize the score value to 0
             MOVS    R1,#0
             STR     R1,[R0,#0]
             
@@ -263,6 +260,7 @@ MainLoop	LDR		R0,=beginningPrompt ;Load beginningPrompt constant
 			BEQ		Rules               ;If 'r', go to Rules
 			B		MainLoop            ;Go to MainLoop
 			
+			;Rules Prompt
 Rules		LDR		R0,=helpCommands
 			BL		PutStringSB
 			LDR		R0,=helpCommands2
@@ -290,9 +288,14 @@ GameLoop	SUBS	R2,R2,#1            ;Decrement the number of seconds for the round
 WrongAnswer	MOVS	R0,#'>'             ;R0 gets '>'
 			BL		PutChar             ;Print '>'
 			BL		GetChar             ;Get a character from the user
-            BCS     OutofTime           ;
+            BCS     OutofTime           ;GetChar was modified to set the C flag on return if the time runs out
 			BL		PutChar
-			CMP		R1,#0
+			;Finds out the current color displayed on the board:
+			;	0 -> No Lights are On
+			;	1 -> Red Light is On
+			;	2 -> Green Light is On
+			;	3 -> Both Lights are on
+			CMP		R1,#0		
 			BEQ		NoneOn
 			CMP		R1,#1
 			BEQ		RedOn
@@ -301,37 +304,41 @@ WrongAnswer	MOVS	R0,#'>'             ;R0 gets '>'
 			CMP		R1,#3
 			BEQ		BothOn
             
+			;Loads the correct prompt for the current light, and checks if the input is correct
 NoneOn		LDR		R6,=neither
 			CMP		R0,#0x4E			
 			BEQ		Right
 			CMP		R0,#0x6E
 			BEQ		Right
-			ADDS	R4,R4,#1
-			B		WrongAnswer
+			ADDS	R4,R4,#1		;If the input makes it past the checks its wrong and the wrong counter
+			B		WrongAnswer		;is incremented and the program loops back to a midway point in the game loop
 			
+			;Loads the correct prompt for the current light, and checks if the input is correct
 RedOn		LDR		R6,=red
 			CMP		R0,#0x52			
 			BEQ		Right
 			CMP		R0,#0x72
 			BEQ		Right
-			ADDS	R4,R4,#1
-			B		WrongAnswer
+			ADDS	R4,R4,#1		;If the input makes it past the checks its wrong and the wrong counter
+			B		WrongAnswer		;is incremented and the program loops back to a midway point in the game loop
 
+			;Loads the correct prompt for the current light, and checks if the input is correct
 GreenOn		LDR		R6,=green
 			CMP		R0,#0x47			
 			BEQ		Right
 			CMP		R0,#0x67
 			BEQ		Right
-			ADDS	R4,R4,#1
-			B		WrongAnswer
+			ADDS	R4,R4,#1 		;If the input makes it past the checks its wrong and the wrong counter
+			B		WrongAnswer 	;is incremented and the program loops back to a midway point in the game loop
 
+			;Loads the correct prompt for the current light, and checks if the input is correct
 BothOn		LDR		R6,=both
 			CMP		R0,#0x42			
 			BEQ		Right
 			CMP		R0,#0x62
 			BEQ		Right
-			ADDS	R4,R4,#1
-			B		WrongAnswer
+			ADDS	R4,R4,#1		;If the input makes it past the checks its wrong and the wrong counter
+			B		WrongAnswer		;is incremented and the program loops back to a midway point in the game loop
 			
 Right		
 			LDR		R0,=correct
@@ -357,8 +364,13 @@ Right
             MOVS    R2,R7
 			B		GameLoop
 
-OutofTime   LDR     R0,=outOfTime
+OutofTime   LDR     R0,=outOfTime		;If the user runs out of time in a round program is sent here
             BL      PutStringSB
+			;Finds out the current color displayed on the board:
+			;	0 -> No Lights are On
+			;	1 -> Red Light is On
+			;	2 -> Green Light is On
+			;	3 -> Both Lights are on
             CMP		R1,#0
 			BEQ		NoneOnWRONG
 			CMP		R1,#1
@@ -367,18 +379,21 @@ OutofTime   LDR     R0,=outOfTime
 			BEQ		GreenOnWRONG
 			CMP		R1,#3
 			BEQ		BothOnWRONG
-backtoLOOP  MOVS    R0,R6
+backtoLOOP  MOVS    R0,R6			;Loads the prompt held in R6
             BL      PutStringSB
+			;Displays the current score
             LDR     R0,=currentScore
             BL      PutStringSB
             LDR		R0,=Score
 			LDR		R0,[R0,#0]
 			BL		PutNumU
 			BL		NewLine
+			;Checks if the game is over
             CMP     R5,#10
             BEQ     EndOfGame
             B       GameLoop
 
+			;Loads the corresponding prompt to the color currently displayed
 NoneOnWRONG LDR     R6,=neither
             B       backtoLOOP
 
@@ -391,6 +406,7 @@ GreenOnWRONG LDR    R6,=green
 BothOnWRONG LDR     R6,=both
             B       backtoLOOP
 
+			;Resets variables such as score and round counter so the game can be restarted
 EndOfGame	BL      NewLine
             LDR		R0,=finalScore
 			BL		PutStringSB
@@ -399,17 +415,10 @@ EndOfGame	BL      NewLine
 			BL		PutNumU
             BL      NewLine
             MOVS    R1,#0
-            BL      Toggle_Light
+            BL      Toggle_Light			;Turns off the lights
             BL      NewLine
             BL      NewLine
 			B		MainLoop
-			
-		
-
-		
-       
-           
-
 ;>>>>>   end main program code <<<<<
 ;Stay here
             B       .
@@ -466,6 +475,12 @@ Init_Lights		PROC		{R0-R14}
 Toggle_Light    PROC		{R0-R14}
 			PUSH			{R0-R3}
 			
+			
+			;Finds out which color to display on the board:
+			;	0 -> No Lights are On
+			;	1 -> Red Light is On
+			;	2 -> Green Light is On
+			;	3 -> Both Lights are on
 			CMP		R1,#0
 			BEQ		None
 			CMP		R1,#1
@@ -511,7 +526,7 @@ Green 		;Turn on green LED
 			STR  R1,[R0,#GPIO_PSOR_OFFSET]
 			B	 EndLight
 
-BothLights		;Turn on red LED
+BothLights	;Turn on red LED
 			LDR  R0,=FGPIOE_BASE
             LDR  R1,=LED_RED_MASK
             STR  R1,[R0,#GPIO_PCOR_OFFSET]
